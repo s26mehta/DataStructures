@@ -15,11 +15,12 @@ class Queue:
         if self.size() == 0:
             return False
         else:
-            num = -1 * self.size()
-            del self.items[num]
+            print self.item[0]
+            del self.items[0]
 
     def peek(self):
         if self.size() == 0:
             print("Queue is empty")
         else:
             return self.items[0]
+
