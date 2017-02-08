@@ -1,12 +1,11 @@
-#base class
 class Node:
     def __init__(self, data):
         self.data = data
         self.left = None
         self.right = None
 
-#derived class
-class Binary_Tree(Node):
+
+class Binary_Tree:
     def __init__(self):
         self.root = None
 
