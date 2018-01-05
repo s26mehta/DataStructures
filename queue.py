@@ -6,7 +6,7 @@ class Queue:
         return len(self.items)
 
     def isEmpty(self):
-        return self.size() == 0
+        return len(self.items) == 0
 
     def enqueue(self, item):
         return self.items.append(item)
@@ -15,8 +15,9 @@ class Queue:
         if self.size() == 0:
             return False
         else:
-            print self.item[0]
+            first = self.items[0]
             del self.items[0]
+            return first
 
     def peek(self):
         if self.size() == 0:

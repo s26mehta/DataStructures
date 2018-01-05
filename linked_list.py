@@ -114,7 +114,6 @@ class Linked_List:
         temp = self.head
         for i in range(index-1):
             temp = temp.next
-
         delnode= temp.next
         temp.next = temp.next.next
         del delnode
