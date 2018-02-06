@@ -55,11 +55,11 @@ class Linked_List:
 
     def insert(self, value, index=None):
         if self.size == 0 and index == 0:
-            self.addFirst(value)
+            return self.addFirst(value)
         if self.size != 0 and self.size == index+1:
-            self.addLast(value)
+            return self.addLast(value)
         if index is None:
-            self.addLast()
+            return self.addLast()
         if index > (self.size-1):
             print "Not a valid index"
             return False
@@ -72,6 +72,7 @@ class Linked_List:
         node.next = temp.next
         temp.next = node
         self.size +=1
+        return True
 
     def removeFirst(self):
         if self.size == 0:
