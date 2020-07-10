@@ -1,4 +1,4 @@
-from csv_tables import CountryInformationCSVTable,\
+from Data_Interview.csv_tables import CountryInformationCSVTable,\
                        CountryIndicatorsCSVTable,\
                        CountryDimensionsCSVTable,\
                        CountryIndicatorFactsCSVTable

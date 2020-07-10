@@ -1,10 +1,6 @@
 import urllib2
-import json
-import csv
 
-from collections import defaultdict
-
-from csv_tables import *
+from Data_Interview.csv_tables import *
 
 def extract_raw_country_information(iso2code):
   url = ('http://api.worldbank.org/v2/countries/%s?format=json' % iso2code)

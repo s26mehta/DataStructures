@@ -12,6 +12,8 @@ class Stack:
         return self.items.append(item)
 
     def pop(self):
+        if self.size() == 0:
+            print("Stack is empty")
         del self.items[-1]
 
     def peek(self):
