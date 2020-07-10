@@ -315,7 +315,7 @@ def find_elements(arr, total_sum):
     if total_sum - arr[start] > arr[end]:
       continue
     while total_sum - arr[start] < arr[end]:
-      if arr[start] + arr[end] = total_sum:
+      if arr[start] + arr[end] == total_sum:
         combinations.append(str(arr[start]) + ',' + str(arr[end]))
       end -= 1
 
