@@ -143,15 +143,15 @@ def find_missing_num_slow(input, start = 0):
 
 
 
-#################################################################################
-## Interview: Given an array of integers find the kth largest integer.
+#####################################################################################
+## Interview: Given an array of integers find the kth largest integer. No duplicates
 
 # Ex:  [6,10,5,7,8,3,1]
 
 # If k == 3  ==> 7
 # If k == 2  ==> 8
 # If k == 6  ==> 3
-#################################################################################
+#####################################################################################
 
 def find_k_largest(arr, k):
     result = float('inf')
@@ -165,6 +165,29 @@ def find_k_largest(arr, k):
 
 # print(find_k_largest([6,10,5,7,8,3,1], 6))
 
+
+
+#####################################################################################
+## Interview: Given an array of integers find the kth largest integer. Has duplicates
+
+# Ex:  [6,10,5,7,8,3,1,10]
+
+# If k == 3  ==> 7
+# If k == 2  ==> 8
+# If k == 6  ==> 3
+#####################################################################################
+
+def find_k_largest(arr, k):
+    result = float('inf')
+    for i in range(k):
+        cur_largest = float('-inf')
+        for item in arr:
+            if item > cur_largest and item < result:
+                cur_largest = item
+        result = cur_largest
+    return result
+
+# print(find_k_largest([6,10,5,7,8,3,1], 6))
 
 
 
@@ -302,26 +325,24 @@ def mergestr(a, b):
 ###################################################################################
 ### Find all combinations of two  numbers that equal to sum in unsorted array
 ###################################################################################
+def find_combinations(arr, total_sum):
+  nums_dict = {}
+  result = set()
+  for i in arr:
+    if i in nums_dict:
+      nums_dict[i] += 1
+    else:
+      nums_dict[i] = 1
 
-def find_elements(arr, total_sum):
-  start = 0
-  end = len(arr) - 1
-  combinations = []
+  for k,v in nums_dict.items():
+    diff = total_sum - k
 
-  for i in range(len(arr)):
-    start = i
-    if total_sum - arr[start] == arr[end]:
-      combinations.append(str(arr[start]) + ',' + str(arr[end]))
-    if total_sum - arr[start] > arr[end]:
-      continue
-    while total_sum - arr[start] < arr[end]:
-      if arr[start] + arr[end] == total_sum:
-        combinations.append(str(arr[start]) + ',' + str(arr[end]))
-      end -= 1
+    if diff == k and v > 1:
+      result.add((k,k))
+    elif diff in nums_dict:
+      result.add(tuple(sorted([k,diff])))
 
-    end = len(arr) - 1
-
-  return combinations
+  return result
 
 
 ###################################################################################
@@ -344,28 +365,59 @@ def find_elements1(arr, total_sum):
 ###########################################################################
 ## Interview: Implement in-order binary tree traversal without recursion
 ###########################################################################
+def in_order_recurse(root, result=[]):
+  if root.left != None:
+    in_order_recurse(root.left, result)
+  result.append(root.val)
+  if root.right != None:
+    in_order_recurse(root.right, result)
+
+  return result
+
 def in_order_iter(root):
     if root == None:
         return
     output = []
-    stack = [root]
+    stack = [(root, False)]
 
-    went_left = False
-    while(len(stack)>0):
+    while len(stack) > 0:
         node = stack.pop()
 
-        if node.left != None and not went_left:
-            stack.append(node)
-            stack.append(node.left)
-        else:
-            output.append(node)
-            went_left = True
+        if node[0].left != None and node[1] is False:
+            stack.append((node[0], True))
+            stack.append((node[0].left, False))
+            continue
+        output.append(node[0].val)
 
-            if node.right != None:
-                stack.append(node.right)
-                went_left = False
-
+        if node[0].right != None:
+          stack.append((node[0].right, False))
     return output
+
+
+###########################################################################
+## Interview: Implement post-order binary tree traversal without recursion
+###########################################################################
+def postOrderTraversal(root):
+  if root == None:
+    return
+  stack = [(root, False, False)]
+  result = []
+
+  while len(stack) != 0:
+    cur_node = stack.pop()
+    if cur_node[0].left != None or cur_node[0].right != None:
+      if cur_node[0].left != None and cur_node[1] is False:
+        stack.append((cur_node[0], True, cur_node[2]))
+        stack.append((cur_node[0].left, False, False))
+        continue
+      if cur_node[0].right != None and cur_node[2] is False:
+        stack.append((cur_node[0], cur_node[1], True))
+        stack.append((cur_node[0].right, False, False))
+        continue
+    result.append(cur_node[0].val)
+
+  return result
+
 
 
 ##########################################################################################
@@ -426,10 +478,36 @@ def total_exists(input_arr, sum):
 
     return False
 
+def contiguous_combinations(arr, sum):
+  total_combos_found = 0
+
+  i = 0
+  cur_sum = 0
+  j = 0
+  while i < len(arr)-1:
+    print(cur_sum)
+    if i != 0:
+      cur_sum -= arr[i-1]
+    else:
+      cur_sum = arr[i]
+
+    while cur_sum < sum and j < len(arr)-1:
+      j += 1
+      cur_sum += arr[j]
+
+    if cur_sum == sum:
+      total_combos_found += 1
+
+    i += 1
+
+
+  return total_combos_found
+
+
 #[6, 1 ,2, 2, 4, 23]
-# arr = [6, 0 ,0, 1, 9, 23]
+# arr = [6, 2 ,4, 6, 2, 6, 0, 1]
 # total = 8
-# print(total_exists(arr, total))
+# print(contiguous_combinations(arr, total))
 
 
 
@@ -505,22 +583,19 @@ def find_nums_for_sum(num, arr):
 #################################################################################
 import math
 def is_palindrome(str):
-    if len(str) == 0 or len(str) == 1:
-        return True
-    else:
-        end = len(str)-1
-        for i in range(len(str)-1):
-            if str[i] != str[end]:
-                return False
+  if len(str) == 0 or len(str) == 1:
+      return True
 
-            if len(str) % 2 == 0 and end == ((len(str)/2)+1):
-                break
-            if len(str) % 2 != 0 and end == i:
-                break
-            end = end-1
+  low = 0
+  high = len(str)-1
+  while low != high and low-1 != high:
+    if str[low] != str[high]:
+        return False
+    low += 1
+    high -= 1
 
-        return True
-# print is_palindrome("racecar")
+  return True
+print(is_palindrome("racefcar"))
 
 
 
@@ -587,3 +662,58 @@ def is_bst(node, min=int_min, max=int_max):
 #          [ 0 , 1, -1, '_'],
 #          [ 1,  2, -1, '_']]
 #################################################################################
+def distance_to_guard(input):
+  result = []
+  for i in range(len(input)):
+    if len(result) == i:
+      result.append([])
+    for j in range(len(input[0])):
+      if input[i][j] == 0:
+        result[i].append(0)
+      elif input[i][j] == -1:
+        result[i].append(-1)
+      else:
+        result[i].append(bfs(input, (i,j), set(), 0, [float('inf')])[0])
+
+  return result
+
+def bfs(input, cur_pos, visited, distance, min_distance):
+
+  if input[cur_pos[0]][cur_pos[1]] == 0:
+    min_distance[0] = min(distance, min_distance[0])
+    return min_distance
+
+  visited.add(cur_pos)
+
+
+  row = cur_pos[0]
+  col = cur_pos[1]
+
+  # up
+  if row > 0 and input[row-1][col] is not -1 and (row-1, col) not in visited:
+    bfs(input, (row-1, col), visited, distance+1, min_distance)
+
+  # left
+  if col > 0 and input[row][col-1] is not -1 and (row, col-1) not in visited:
+    bfs(input, (row, col-1), visited, distance+1, min_distance)
+
+  # down
+  if row < len(input)-1 and input[row+1][col] is not -1 and (row+1, col) not in visited:
+    bfs(input, (row+1, col), visited, distance+1, min_distance)
+
+  # right
+  if col < len(input[0])-1 and input[row][col+1] is not -1 and (row, col+1) not in visited:
+    bfs(input, (row, col+1), visited, distance+1, min_distance)
+
+  return min_distance
+
+input = [['_', '_', 0 , 0],
+         [ 0 , '_', -1, '_'],
+         [ '_', '_', -1, '_'],
+         ['_', '_', -1, '_'],
+         ['_', '_', -1, '_'],
+         [0, '_', '_', '_']]
+print(distance_to_guard(input))
+
+
+
