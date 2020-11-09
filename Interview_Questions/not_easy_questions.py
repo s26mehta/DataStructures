@@ -10,33 +10,40 @@
 #### result = "bed bath and beyond"
 #####################################################################
 
-maxLength = float("-inf")
 
-def getMinWordBreak(s, dict):
-	dict = set(dict)
-	memo = {}
-	n = len(s)
-	res = dfs(s, [], dict, memo, 0)
-	return maxLength if res else 0
+def getMinWords(s, word_dict):
+  if len(s) == 0:
+    return 0
+  words = set(word_dict)
+  if s in words:
+    return 1
+  return recurse(s, words, {})
 
-def dfs(s, path, dict, memo, level):
-	if s in memo:
-		return memo[s]
-	if not s:
-		maxLength = max(maxLength, level)
-		return [""]
-	path = []
-	for word in dict:
-		if s[:len(word)] != word:
-			continue
-		for r in dfs(s[len(word):], path, dict, memo, level + 1):
-			path.append(word + (r if r == "" else " " + r) )
-	memo[s] = path
-	return path
+def recurse(s, words, memo):
+  if s in memo:
+    return memo[s]
 
-s = "bedbathandbeyand"
-dict = ["bed", "bath", "bat", "and", "hand", "bey", "beyond"]
-# print(getMinWordBreak(s, dict))
+  min_words = float('inf')
+  cur_word = ""
+  for i in range(len(s)):
+    cur_word += s[i]
+    if cur_word in words:
+      if i == len(s)-1:
+        memo[cur_word] = 1
+        return 1
+      else:
+        result = recurse(s[i+1:], words, memo)
+        memo[s[i+1:]] = result
+        min_words = min(min_words, result+1)
+
+  return min_words
+
+
+s = "bedbathandbeyond"
+dict = ["bed", "bath", "bat", "and", "hand", "be" , "yond", "beyond", "bedbath"]
+s = "aaaaaaaa"
+dict = ["aa", "a", "aaa"]
+# print(getMinWords(s, dict))
 
 
 ###############################################################################################
@@ -83,8 +90,33 @@ def reduce_string(str):
     i += cur_rep
   return str
 
-# print(reduce_string('dddabbbbaccccaax'))
 
+def reduce_string_2(input_str):
+  if len(input_str) < 2:
+    return input_str
+
+  cur_char = input_str[0]
+  appearances = 1
+  new_str = ""
+
+  idx = 1
+  while (idx < len(input_str)):
+    if input_str[idx] == cur_char:
+      appearances += 1
+    else:
+      if appearances >= 3:
+        return reduce_string_2(new_str + input_str[idx:])
+      else:
+        new_str += cur_char * appearances
+        cur_char = input_str[idx]
+        appearances = 1
+    idx += 1
+
+  return new_str if appearances >=3 else new_str + cur_char*appearances
+
+
+# print(reduce_string_2('dddabbbbaccccaax'))
+# print(reduce_string_2('aaabbbc'))
 
 
 #########################################################
@@ -97,50 +129,38 @@ def reduce_string(str):
 #### 4+5+1 = 10 (1 is carried over)
 #### Total carry operations: 1+1 = 2
 ###########################################################
-
-def numberOfCarryOperations(num_1, num_2):
-  num_1 = str(num_1)
-  num_2 = str(num_2)
-
-  num_1_len = len(num_1)
-  num_2_len = len(num_2)
-
-  difference = abs(num_1_len - num_2_len)
-
-  if difference != 0 and num_1_len > num_2_len:
-    temp = "0"*difference
-    num_2 = temp+num_2
-  elif difference != 0 and num_1_len < num_2_len:
-    temp = "0"*difference
-    num_1 = temp+num_1
-
-  num_1_len = len(num_1)
-  num_2_len = len(num_2)
-
-  total_carry_over = 0
-  i = num_1_len-1
+def numCarryOperations(num_1, num_2):
+  num_1_str = str(num_1)[::-1]
+  num_2_str = str(num_2)[::-1]
+  diff = len(num_1_str) - len(num_2_str)
+  num_carries = 0
   cur_carry = 0
-  while(i >= 0):
-    total = int(num_2[i]) + int(num_1[i]) + cur_carry
-    if total > 9:
-      total = str(total)
-      total_carry_over += int(total[0])
-      cur_carry = int(total[0])
+  for i in range(max(len(num_1_str), len(num_2_str))):
+    if i < min(len(num_1_str),len(num_2_str)):
+      sum = int(num_1_str[i]) + int(num_2_str[i]) + cur_carry
+    else:
+      if diff > 0:
+        sum = int(num_1_str[i]) + cur_carry
+      else:
+        sum = int(num_2_str[i]) + cur_carry
+    # print(sum)
+    if sum > 9:
+      cur_carry = 1
+      num_carries += 1
     else:
       cur_carry = 0
-    i -=1
-  print(total_carry_over)
+  return num_carries
 
-# numberOfCarryOperations(55, 65) # 2
-# numberOfCarryOperations(123, 456) # 0
-# numberOfCarryOperations(555, 555) # 3
-# numberOfCarryOperations(900, 11) # 0
-# numberOfCarryOperations(145, 55) # 2
-# numberOfCarryOperations(0, 0) # 0
-# numberOfCarryOperations(1, 99999) # 5
-# numberOfCarryOperations(999045, 1055) # 5
-# numberOfCarryOperations(101, 809) # 1
-# numberOfCarryOperations(189, 209) # 1
+# print(numCarryOperations(55, 65)) # 2
+# print(numCarryOperations(123, 456)) # 0
+# print(numCarryOperations(555, 555)) # 3
+# print(numCarryOperations(900, 11)) # 0
+# print(numCarryOperations(145, 55)) # 2
+# print(numCarryOperations(0, 0)) # 0
+# print(numCarryOperations(1, 99999)) # 5
+# print(numCarryOperations(999045, 1055)) # 5
+# print(numCarryOperations(101, 809)) # 1
+# print(numCarryOperations(189, 209)) # 1
 
 
 
@@ -151,28 +171,33 @@ def numberOfCarryOperations(num_1, num_2):
 ####            [1,2,3,5,6,7,8,9]
 ####            [0,1,11,4,3,2,13,14,5,6,7,8]
 ###########################################################
+def findLargestContiguous(list_1, list_2):
+  longest_sequence = []
+  map = {}
+  for i in range(len(list_1)):
+    if list_1[i] in map:
+      map[list_1[i]].append(i)
+    else:
+      map[list_1[i]] = [i]
 
-def findlargestContiguous(user_1, user_2):
-  max_count = 0
-  cur_count = 0
+  i = 0
+  while i < len(list_2):
+    if list_2[i] in map:
+      for idx in map[list_2[i]]:
+        j = i
+        cur_sequence = [list_2[j]]
+        list_1_idx = idx
+        while j+1 < len(list_2) and list_1_idx +1 < len(list_1) and list_2[j+1] == list_1[list_1_idx +1]:
+          j += 1
+          list_1_idx += 1
+          cur_sequence.append(list_2[j])
+        if len(cur_sequence) > len(longest_sequence):
+          longest_sequence = cur_sequence
+    i += 1
+  return longest_sequence
 
-  if len(user_1) <= len(user_2):
-    for i in range(len(user_1)):
-      if user_1[i] == user_2[i]:
-        cur_count += 1
-        max_count = max(max_count, cur_count)
-      else:
-        cur_count = 0
-  else:
-    for i in range(len(user_2)):
-      if user_1[i] == user_2[i]:
-        cur_count += 1
-        max_count = max(max_count, cur_count)
-      else:
-        cur_count = 0
-  print(max_count)
+# print(findLargestContiguous([1,2,3,5,6,7,8,9], [0,4,5,4,5,3,1,2,5,6,7,8]))
 
-# findlargestContiguous([1,2,3,5,6,7,8,9], [0,4,5,4,5,3,1,2,5,6,7,8])
 
 
 
@@ -232,42 +257,35 @@ a = findHitsPerDomain(input)
 ##  // [([)]]
 #################################################################################
 
-def find_most_nested_string1(input):
-    open_brackets = set(['[', '(', '{'])
-    close_brackets = set([']', ')', '}'])
-    result = []
+def find_most_nested_string(input, open_brackets = set(['[', '(', '{']), close_brackets = set([']', ')', '}'])):
+  if input == None or len(input) < 2:
+    return input
+  result = ()
+  depth = 0
+  idx = 0
+  while (idx < len(input)):
+    if input[idx] in open_brackets:
+      depth += 1
+    elif input[idx] in close_brackets:
+      depth -= 1
+    else:
+      cur_str = input[idx]
 
-    max_depth = 0
-    cur_depth = 0
-    cur_string = ""
+      while (idx+1 < len(input) and input[idx+1] not in open_brackets and input[idx+1] not in close_brackets):
+        idx += 1
+        cur_str += input[idx]
 
-    for i in input:
-        if i in open_brackets:
-            cur_depth += 1
-            cur_string = ''
-            continue
-        if i in close_brackets:
-            if cur_depth == max_depth:
-                result.append(cur_string)
-            cur_depth -= 1
-            cur_string = ''
-            continue
-        if cur_depth < max_depth:
-            continue
-        if cur_depth > max_depth:
-            result = []
-            max_depth = cur_depth
-        cur_string += i
+      if result == () or result[1] < depth:
+        result = (cur_str, depth)
+    idx += 1
+  return result[0] if result != () else ""
 
-    return result
-
-#
 # print(find_most_nested_string("af[cd([ab]) (a[b])]"))
 # print(find_most_nested_string("[]"))
 # print(find_most_nested_string(""))
 # print(find_most_nested_string("af[cd([a]) a[b]]"))
 # print(find_most_nested_string("af[cd([{string}]) a[{(b-string)}]]"))
-# print(find_most_nested_string("af[cd([{string}]) a[{(b-string)}]] [[[[abecd]]]]"))
+# print(find_most_nested_string("af[cd([{string}]) a[{(b-string)}]] [[[[[abecd]]]]]"))
 # print(find_most_nested_string("af[cd([{a}])]"))
 
 

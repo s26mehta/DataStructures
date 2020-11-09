@@ -595,7 +595,7 @@ def is_palindrome(str):
     high -= 1
 
   return True
-print(is_palindrome("racefcar"))
+# print(is_palindrome("racefcar"))
 
 
 
@@ -665,47 +665,45 @@ def is_bst(node, min=int_min, max=int_max):
 def distance_to_guard(input):
   result = []
   for i in range(len(input)):
-    if len(result) == i:
-      result.append([])
+    result.append([float('inf')]*len(input[0]))
+  for i in range(len(input)):
     for j in range(len(input[0])):
       if input[i][j] == 0:
-        result[i].append(0)
+        result[i][j] = 0
       elif input[i][j] == -1:
-        result[i].append(-1)
+        result[i][j] = -1
       else:
-        result[i].append(bfs(input, (i,j), set(), 0, [float('inf')])[0])
+        bfs(input, (i,j), (i,j), set(), 0, result)
+
 
   return result
 
-def bfs(input, cur_pos, visited, distance, min_distance):
+def bfs(input, start_pos, cur_pos, visited, distance, output):
 
   if input[cur_pos[0]][cur_pos[1]] == 0:
-    min_distance[0] = min(distance, min_distance[0])
-    return min_distance
+    output[start_pos[0]][start_pos[1]] = min(distance, output[start_pos[0]][start_pos[1]])
+    return
 
   visited.add(cur_pos)
-
 
   row = cur_pos[0]
   col = cur_pos[1]
 
   # up
   if row > 0 and input[row-1][col] is not -1 and (row-1, col) not in visited:
-    bfs(input, (row-1, col), visited, distance+1, min_distance)
+    bfs(input, start_pos, (row-1, col), visited, distance+1, output)
 
   # left
   if col > 0 and input[row][col-1] is not -1 and (row, col-1) not in visited:
-    bfs(input, (row, col-1), visited, distance+1, min_distance)
+    bfs(input, start_pos, (row, col-1), visited, distance+1, output)
 
   # down
   if row < len(input)-1 and input[row+1][col] is not -1 and (row+1, col) not in visited:
-    bfs(input, (row+1, col), visited, distance+1, min_distance)
+    bfs(input, start_pos, (row+1, col), visited, distance+1, output)
 
   # right
   if col < len(input[0])-1 and input[row][col+1] is not -1 and (row, col+1) not in visited:
-    bfs(input, (row, col+1), visited, distance+1, min_distance)
-
-  return min_distance
+    bfs(input, start_pos, (row, col+1), visited, distance+1, output)
 
 input = [['_', '_', 0 , 0],
          [ 0 , '_', -1, '_'],
