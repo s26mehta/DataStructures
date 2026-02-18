@@ -48,3 +48,18 @@ def md5(name):
     return hash_md5.hexdigest()
 
 # get_duplicates(os.getcwd())
+
+
+def solution(A,K):
+    n=len(A)
+    best = 0
+    count = 1
+    for i in range(n-K-1):
+        # print(i, count)
+        if (A[i] == A[i+1]):
+            count +=1
+        else:
+            count = 1
+        best = max(best,count)
+    return min(max(best,count)+K, n)
+print(solution([1,1,2,2,2,2,3], 2))

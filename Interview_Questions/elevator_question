@@ -1,0 +1,149 @@
+
+'''
+Elevator
+
+Elevator A
+Current: 5
+Destination: 2
+
+9 -> 4
+
+Elevator B
+Current: 2
+Destination: 5
+
+2 -> 5 -> 4
+
+User
+Floor: 4
+Press: Down
+
+# of Elevators = 10
+
+- is an elevator going in same direction that is able to pick up User -> add to path
+- is an elevator stationary and able to go to User -> add to path 
+- find elevator with shorestet path to user -> add to path
+
+'''
+from enum import Enum
+
+class Direction(Enum):
+    UP = "UP"
+    DOWN = "DOWN"
+
+
+class Elevator:
+    def __init__(self, id):
+        self.id = id
+        self.cur_floor = 0
+        self.destination = 20
+        self.direction = Direction.UP
+
+class ElevatorSystem:
+    def __init__(self, num_elevators):
+        self.elevators = [Elevator(id) for id in range(num_elevators)]
+    
+    def call_elevator(self, user_floor, user_direction):
+        closest_elevator = [None, None] # (elevator, traversal_to_user_floor)
+
+        for elevator in self.elevators:
+            # check is elevator is not moving
+            if elevator.destination == None:
+                traversal = abs(user_floor - elevator.cur_floor)
+                if closest_elevator[1] == None:
+                    closest_elevator = [elevator, traversal]
+                if traversal < closest_elevator[1]:
+                    closest_elevator = [elevator, traversal]
+                continue 
+            
+            # check if elevator going in same direction
+            same_direction_elevator = self.validate_elevator_direction_and_check_distance(user_direction, user_floor, elevator)
+            if same_direction_elevator[0] == True:
+                if closest_elevator[1] == None:
+                    closest_elevator = [elevator, same_direction_elevator[1]]
+                else:
+                    if same_direction_elevator[1] < closest_elevator[1]:
+                        closest_elevator = [elevator, same_direction_elevator[1]]
+                continue
+            
+            # find elevator total path to user floorfsh
+            elevator_path = self.find_total_path_to_cur_floor(user_direction, user_floor, elevator)
+            if closest_elevator[1] == None:
+                    closest_elevator = [elevator, elevator_path]
+            else:
+                if elevator_path < closest_elevator[1]:
+                    closest_elevator = [elevator, elevator_path]
+            
+            
+        return closest_elevator[0].id, closest_elevator[1]
+
+    def validate_elevator_direction_and_check_distance(self, user_direction, user_floor, elevator):
+        if elevator.direction == user_direction and user_floor-elevator.cur_floor > 0:
+            return [True, user_floor - elevator.cur_floor]
+        
+        return [False, None]
+
+    def find_total_path_to_cur_floor(self, user_direction, user_floor, elevator):
+        if user_direction != elevator.direction:
+            return abs(elevator.destination - elevator.cur_floor) + abs(elevator.destination - user_floor)
+        
+        return abs(elevator.destination - elevator.cur_floor) + abs(user_floor - elevator.destination)
+
+
+
+# system = ElevatorSystem(10)
+# print(system.call_elevator(10, Direction.UP).id)
+# system.elevators[1].cur_floor = 8
+# system.elevators[1].destination = 11
+# print(system.call_elevator(10, Direction.UP).id)
+
+
+system = ElevatorSystem(1)
+print(system.call_elevator(10, Direction.UP))
+print("-----")
+
+system.elevators[0].cur_floor = 11
+print(system.call_elevator(10, Direction.UP))
+print("-----")
+
+system.elevators[0].destination = None
+system.elevators[0].cur_floor = 15
+print(system.call_elevator(10, Direction.UP))
+
+
+system.elevators[0].direction = Direction.DOWN
+system.elevators[0].cur_floor = 20
+system.elevators[0].destination = 0
+print(system.call_elevator(10, Direction.UP))
+
+print("-----")
+
+
+system = ElevatorSystem(2)
+print(system.call_elevator(10, Direction.UP))
+print(system.call_elevator(10, Direction.UP))
+system.elevators[1].cur_floor = 1
+print(system.call_elevator(10, Direction.UP))
+
+system.elevators[1].cur_floor = 11
+system.elevators[1].destination = 12
+print(system.call_elevator(10, Direction.UP))
+
+system.elevators[0].cur_floor = 11
+system.elevators[0].destination = 13
+print(system.call_elevator(10, Direction.UP))
+
+system.elevators[0].cur_floor = 11
+system.elevators[0].destination = None
+print(system.call_elevator(10, Direction.UP))
+
+
+system.elevators[0].cur_floor = 11
+system.elevators[0].destination = 20
+system.elevators[0].direction = Direction.UP
+
+system.elevators[1].cur_floor = 15
+system.elevators[1].destination = 11
+system.elevators[1].direction = Direction.DOWN
+print(system.call_elevator(10, Direction.UP))
+print("-----")

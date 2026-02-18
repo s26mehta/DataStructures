@@ -1,0 +1,145 @@
+# import requests
+# import mysql.connector
+# import pandas as pd
+
+
+# Consider a server that maintains an in-memory mapping of string keys to integer values. Let's assume that operations are applied to the mapping through requests that arrive over the network. Implement a class that has the following specs
+
+# [Functional Requirements]
+# * All read/write operations happen within a transaction.
+# * Changes made in one transaction are only visible to others when a transaction is committed
+# * The server itself is single threaded but may have multiple transactions open at once
+# * Transactions should behave as if they are atomic.
+
+# [Public Facing API]
+# * begin() -> int
+# returns a transaction_id corresponding to a new transaction that has just begun
+
+# * read(transaction_id: int, key: string) -> int
+# the given transaction reads the given key and returns the value associated with the key
+
+# * write(transaction_id: int, key: string, value: int) -> None
+# the given transaction writes the specified value to the given key
+
+# * commit(transaction_id: int) -> None
+# the given transaction is committed, so any writes in that transaction are now visible to all other transactions. this also ends the given transaction
+
+
+
+# s = {'a': 5, 'b': 0}
+
+# # client 1                |     # client 2
+#                           |
+# txid = begin()            |     
+#                           |     txid = begin()
+# a = read(txid, 'a')       |
+#                           |     a = read(txid, 'a')
+# write(txid, 'a', a + 1)   |
+#        |
+#                           |     write(txid, 'a', a + 1)
+# commit(txid)              |
+#                           |     
+#                           |     commit(txid)
+# -------------------------------
+
+"""
+data = {
+    'a' : 5
+    'b' : 0
+}
+
+transaction_db = {
+    txn_id : {
+        'a': 1
+    }
+    txn_id2: {
+        'b': 1
+    }
+}
+
+key_used_set = Set()
+"""
+
+
+# s = {'a': 0}
+# # client 1                |     # client 2
+#                           |
+# txid = begin()            |     
+#                           |     txid = begin() 
+# write(txid, 'a', 10)      |
+#                           |     write(txid, 'a', 20)
+# commit(txid)              |
+#                           |     commit(txid)
+
+
+
+# s = {'a': 0}
+# # client 1                |     # client 2
+#                           |
+# txid = begin()            |     
+#                           |     txid = begin() 
+#                           |     read(txid, 'a')
+# write(txid, 'a', 10)      |
+#                           |     write(txid, 'a', 20)
+# write(txid, 'a', 30)      |
+# commit(txid)              |
+#                           |     commit(txid)
+
+"""
+
+master = {'a': 0}
+transaction_id = {
+    txn_id1 = {
+        'a': [(100, 10)] # (time, value)
+    }
+    txn_id2 = {
+        'a': [(200, 20)]
+    }
+}
+
+"""
+
+
+import random
+import heapq
+
+class Solution():
+    def __init__(self):
+        self.master_db = {}
+        self.transaction_db = {}
+        self.key_read_set = set()
+        self.key_write_set = set()
+    
+    def begin(self):
+        txn_id = random.random()
+        self.transaction_db[txn_id] = {}
+        return random.int
+    
+    def read(self, txn_id, key):
+        if txn_id in self.transaction_db:
+            if key in self.key_write_set and key not in self.transaction_db[txn_id]:
+                raise Exception("Unable to read for key %s due to pending transaction", key)
+            elif key in self.transaction_db[txn_id]:
+                return self.transaction_db[txn_id][key]
+        else:
+            return self.master_db[key]
+            self.key_read_set(key)
+    
+    def write(self, txn_id, key, value):
+        if txn_id not in self.transaction_db:
+            self.transaction_db[txn_id] = {}
+            
+        if key in self.key_read_set and key not in self.transaction_db[txn_id]:
+            raise Exception("Unable to write for key %s due to pending update")
+            del self.transaction_db[txn_id]
+        else:
+            self.transaction_db[txn_id][key] = value
+            self.key_write_set.add(key)
+        
+    def commit(self, txn_id):
+        transactions = self.transaction_db[txn_id]
+        for key, value in transactions.items():
+            self.master_db[key] = value
+            self.key_used_set.discard(key)
+        del self.transaction_db[txn_id]
+
